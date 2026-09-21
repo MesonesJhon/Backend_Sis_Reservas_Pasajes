@@ -6,6 +6,7 @@ use App\Enums\EstadoVehiculo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Representa una unidad física utilizada
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Vehiculo extends Model
 {
+    use HasFactory;
     protected $table = 'vehiculos';
 
     protected $fillable = [
@@ -71,5 +73,13 @@ class Vehiculo extends Model
     {
         return $this->activo
             && $this->estado->permiteOperacion();
+    }
+
+    /**
+     * Viajes en los que este vehículo ha sido asignado.
+     */
+    public function viajes(): HasMany
+    {
+        return $this->hasMany(Viaje::class);
     }
 }

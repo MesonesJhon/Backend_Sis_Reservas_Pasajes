@@ -85,4 +85,38 @@ class Punto extends Model
             ])
             ->withTimestamps();
     }
+
+
+    /**
+     * Apariciones del punto en recorridos consolidados
+     * de viajes.
+     */
+    public function puntosViaje(): HasMany
+    {
+        return $this->hasMany(PuntoViaje::class);
+    }
+
+    /**
+     * Tarifas en las que este punto funciona
+     * como origen del segmento.
+     */
+    public function tarifasComoOrigen(): HasMany
+    {
+        return $this->hasMany(
+            TarifaViaje::class,
+            'punto_origen_id'
+        );
+    }
+
+    /**
+     * Tarifas en las que este punto funciona
+     * como destino del segmento.
+     */
+    public function tarifasComoDestino(): HasMany
+    {
+        return $this->hasMany(
+            TarifaViaje::class,
+            'punto_destino_id'
+        );
+    }
 }

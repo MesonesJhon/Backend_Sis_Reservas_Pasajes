@@ -10,6 +10,7 @@ use App\Exceptions\OperacionUsuarioNoPermitidaException;
 use Symfony\Component\HttpFoundation\Response;
 use App\Exceptions\ConfiguracionAsientosInvalidaException;
 use App\Exceptions\RecorridoRutaInvalidoException;
+use App\Exceptions\ProgramacionViajeInvalidaException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -74,6 +75,16 @@ return Application::configure(basePath: dirname(__DIR__))
                 ) {
                     return response()->json([
                         'mensaje' => $e->getMessage(),
+                    ], 422);
+                }
+            );
+
+            $exceptions->render(
+                function (
+                    ProgramacionViajeInvalidaException $exception
+                ) {
+                    return response()->json([
+                        'mensaje' => $exception->getMessage(),
                     ], 422);
                 }
             );

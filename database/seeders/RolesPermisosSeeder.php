@@ -230,6 +230,41 @@ class RolesPermisosSeeder extends Seeder
                 'descripcion' => 'Permite configurar el recorrido de una ruta.',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | Permisos de RF-04 Tarifas, Viajes
+            |--------------------------------------------------------------------------
+            */
+
+            [
+                'nombre' => 'viajes.ver',
+                'descripcion' => 'Permite consultar viajes.',
+            ],
+            [
+                'nombre' => 'viajes.crear',
+                'descripcion' => 'Permite crear viajes.',
+            ],
+            [
+                'nombre' => 'viajes.editar',
+                'descripcion' => 'Permite modificar viajes.',
+            ],
+            [
+                'nombre' => 'viajes.cambiar_estado',
+                'descripcion' => 'Permite cambiar el estado de un viaje.',
+            ],
+            [
+                'nombre' => 'viajes.asignar_personal',
+                'descripcion' => 'Permite asignar personal a un viaje.',
+            ],
+            [
+                'nombre' => 'tarifas.ver',
+                'descripcion' => 'Permite consultar las tarifas de los viajes.',
+            ],
+            [
+                'nombre' => 'tarifas.configurar',
+                'descripcion' => 'Permite configurar las tarifas de un viaje.',
+            ],
+
 
         ];
 
@@ -284,8 +319,6 @@ class RolesPermisosSeeder extends Seeder
         $this->sincronizarPermisos(
             $operador,
             [
-                'viajes.ver',
-
                 'reservas.ver',
                 'reservas.crear',
                 'reservas.cancelar',
@@ -301,6 +334,15 @@ class RolesPermisosSeeder extends Seeder
 
                 'puntos.ver',
                 'rutas.ver',
+
+                'viajes.ver',
+                'viajes.crear',
+                'viajes.editar',
+                'viajes.cambiar_estado',
+                'viajes.asignar_personal',
+
+                'tarifas.ver',
+                'tarifas.configurar',
             ]
         );
 
@@ -311,8 +353,6 @@ class RolesPermisosSeeder extends Seeder
         $this->sincronizarPermisos(
             $conductor,
             [
-                'viajes.ver',
-
                 'manifiesto.ver',
                 'viaje.iniciar',
                 'viaje.finalizar',
@@ -323,6 +363,9 @@ class RolesPermisosSeeder extends Seeder
 
                 'puntos.ver',
                 'rutas.ver',
+
+                'viajes.ver',
+                'tarifas.ver',
             ]
         );
 
@@ -333,11 +376,8 @@ class RolesPermisosSeeder extends Seeder
         $this->sincronizarPermisos(
             $cliente,
             [
-                'viajes.ver',
-
                 'reservas.crear',
                 'reservas.cancelar',
-
                 'tickets.ver',
             ]
         );

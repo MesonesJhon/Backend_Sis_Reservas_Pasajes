@@ -96,4 +96,12 @@ class Ruta extends Model
     {
         return $this->activo;
     }
+
+    /**
+     * Viajes programados utilizando esta ruta.
+     */
+    public function viajes(): HasMany
+    {
+        return $this->hasMany(Viaje::class);
+    }
 }

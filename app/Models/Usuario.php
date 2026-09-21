@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Representa a una persona que puede autenticarse en el sistema.
@@ -76,5 +77,16 @@ class Usuario extends Authenticatable
                 $consulta->where('nombre', $permiso);
             })
             ->exists();
+    }
+
+    /**
+     * Asignaciones operativas del usuario
+     * en los diferentes viajes.
+     */
+    public function asignacionesViaje(): HasMany
+    {
+        return $this->hasMany(
+            PersonalViaje::class
+        );
     }
 }
