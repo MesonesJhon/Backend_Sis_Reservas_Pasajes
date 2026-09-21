@@ -9,6 +9,7 @@ use App\Http\Middleware\VerificarRol;
 use App\Exceptions\OperacionUsuarioNoPermitidaException;
 use Symfony\Component\HttpFoundation\Response;
 use App\Exceptions\ConfiguracionAsientosInvalidaException;
+use App\Exceptions\RecorridoRutaInvalidoException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -66,6 +67,16 @@ return Application::configure(basePath: dirname(__DIR__))
                     'mensaje' => $excepcion->getMessage(),
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             });
+
+            $exceptions->render(
+                function (
+                    RecorridoRutaInvalidoException $e
+                ) {
+                    return response()->json([
+                        'mensaje' => $e->getMessage(),
+                    ], 422);
+                }
+            );
     })
     ->prefersJsonResponses()
     ->create();

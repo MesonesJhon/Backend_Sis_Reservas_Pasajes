@@ -185,6 +185,52 @@ class RolesPermisosSeeder extends Seeder
                 'nombre' => 'asientos.configurar',
                 'descripcion' => 'Permite modificar la configuración de asientos de un vehículo.',
             ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Permisos de RF-03 Puntos, Rutas y Punto_Rutas
+            |--------------------------------------------------------------------------
+            */
+
+            [
+                'nombre' => 'puntos.ver',
+                'descripcion' => 'Permite consultar puntos de rutas.',
+            ],
+            [
+                'nombre' => 'puntos.crear',
+                'descripcion' => 'Permite registrar nuevos puntos.',
+            ],
+            [
+                'nombre' => 'puntos.editar',
+                'descripcion' => 'Permite modificar puntos existentes.',
+            ],
+            [
+                'nombre' => 'puntos.cambiar_estado',
+                'descripcion' => 'Permite activar o desactivar puntos.',
+            ],
+
+            [
+                'nombre' => 'rutas.ver',
+                'descripcion' => 'Permite consultar rutas.',
+            ],
+            [
+                'nombre' => 'rutas.crear',
+                'descripcion' => 'Permite registrar nuevas rutas.',
+            ],
+            [
+                'nombre' => 'rutas.editar',
+                'descripcion' => 'Permite modificar rutas existentes.',
+            ],
+            [
+                'nombre' => 'rutas.cambiar_estado',
+                'descripcion' => 'Permite activar o desactivar rutas.',
+            ],
+            [
+                'nombre' => 'rutas.configurar_recorrido',
+                'descripcion' => 'Permite configurar el recorrido de una ruta.',
+            ],
+
+
         ];
 
         foreach ($permisos as $permiso) {
@@ -252,6 +298,9 @@ class RolesPermisosSeeder extends Seeder
                 'vehiculos.ver',
                 'tipos_vehiculo.ver',
                 'asientos.ver',
+
+                'puntos.ver',
+                'rutas.ver',
             ]
         );
 
@@ -271,6 +320,9 @@ class RolesPermisosSeeder extends Seeder
                 'vehiculos.ver',
                 'tipos_vehiculo.ver',
                 'asientos.ver',
+
+                'puntos.ver',
+                'rutas.ver',
             ]
         );
 
