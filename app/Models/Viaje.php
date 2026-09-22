@@ -125,4 +125,12 @@ class Viaje extends Model
             ->orderByDesc('orden')
             ->first();
     }
+
+    /**
+     * Inventario de asientos congelado para este viaje.
+     */
+    public function asientosViaje(): HasMany
+    {
+        return $this->hasMany(AsientoViaje::class);
+    }
 }

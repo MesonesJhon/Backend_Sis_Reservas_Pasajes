@@ -1,5 +1,5 @@
 <?php
-
+require_once __DIR__.'/Helpers/UsuariosTest.php';
 /*
 |--------------------------------------------------------------------------
 | Configuración global de Pest

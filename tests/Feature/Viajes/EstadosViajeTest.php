@@ -218,3 +218,68 @@ test('el recorrido programado permanece aunque cambie la ruta original', functio
             ->minutos_desde_origen
     )->toBe(360);
 });
+
+
+
+test('al programar un viaje se consolida el inventario de asientos', function () {
+    $viaje = CrearViajeProgramable::ejecutar();
+
+    expect(
+        $viaje->asientosViaje()->count()
+    )->toBe(0);
+
+    $cantidadAsientosActivos = $viaje->vehiculo
+        ->asientos()
+        ->where('activo', true)
+        ->count();
+
+    $this->patchJson(
+        "/api/v1/viajes/{$viaje->id}/estado",
+        [
+            'estado' => 'PROGRAMADO',
+        ]
+    )->assertOk();
+
+    expect(
+        $viaje->asientosViaje()->count()
+    )->toBe($cantidadAsientosActivos);
+});
+
+
+test('el inventario del viaje permanece aunque cambie el asiento fisico', function () {
+    $viaje = CrearViajeProgramable::ejecutar();
+
+    $this->patchJson(
+        "/api/v1/viajes/{$viaje->id}/estado",
+        [
+            'estado' => 'PROGRAMADO',
+        ]
+    )->assertOk();
+
+    $asientoViaje = $viaje
+        ->asientosViaje()
+        ->firstOrFail();
+
+    $codigoOriginal = $asientoViaje->codigo;
+
+    $asientoFisico = $viaje->vehiculo
+        ->asientos()
+        ->firstOrFail();
+
+    $asientoFisico->update([
+        'codigo' => 'MODIFICADO',
+    ]);
+
+    /*
+     * Volvemos a consultar la BD.
+     *
+     * El snapshot no debe cambiar aunque cambie
+     * la configuración física del vehículo.
+     */
+    expect(
+        $viaje
+            ->asientosViaje()
+            ->findOrFail($asientoViaje->id)
+            ->codigo
+    )->toBe($codigoOriginal);
+});

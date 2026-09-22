@@ -14,6 +14,7 @@ class CambiarEstadoViaje
     public function __construct(
         private readonly ValidadorProgramacionViaje $validadorProgramacion,
         private readonly ConsolidarRecorridoViaje $consolidarRecorrido,
+        private readonly ConsolidarAsientosViaje $consolidarAsientosViaje,
     ) {
     }
 
@@ -119,6 +120,14 @@ class CambiarEstadoViaje
                  * recorrido aunque la ruta sea modificada después.
                  */
                 $this->consolidarRecorrido
+                    ->ejecutar($viaje);
+
+
+                /*
+                * Congelamos también el inventario físico
+                * de asientos disponible para este viaje.
+                */
+                $this->consolidarAsientosViaje
                     ->ejecutar($viaje);
             }
 

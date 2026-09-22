@@ -16,6 +16,7 @@ use App\Models\TipoVehiculo;
 use App\Models\Usuario;
 use App\Models\Vehiculo;
 use App\Models\Viaje;
+use App\Models\PuntoViaje;
 use Carbon\Carbon;
 
 class CrearViajeProgramable
@@ -66,6 +67,8 @@ class CrearViajeProgramable
             'minutos_desde_origen' => 360,
         ]);
 
+
+
         /*
          * Si no recibimos vehículo, creamos uno operativo.
          */
@@ -102,7 +105,10 @@ class CrearViajeProgramable
             ]);
 
             $rolConductor = Rol::query()
-                ->where('nombre', 'CONDUCTOR')
+                ->whereIn('nombre', [
+                    'CHOFER',
+                    'CONDUCTOR',
+                ])
                 ->firstOrFail();
 
             $conductor->roles()->attach($rolConductor->id);
@@ -120,6 +126,39 @@ class CrearViajeProgramable
                 $salida->copy()->addMinutes(360),
         ]);
 
+        PuntoViaje::create([
+
+            'viaje_id'=>$viaje->id,
+
+            'punto_id'=>$origen->id,
+
+            'orden'=>1,
+
+            'permite_embarque'=>true,
+
+            'permite_desembarque'=>false,
+
+            'minutos_desde_origen'=>0,
+
+        ]);
+
+
+        PuntoViaje::create([
+
+            'viaje_id'=>$viaje->id,
+
+            'punto_id'=>$destino->id,
+
+            'orden'=>2,
+
+            'permite_embarque'=>false,
+
+            'permite_desembarque'=>true,
+
+            'minutos_desde_origen'=>360,
+
+        ]);
+
         $viaje->personal()->create([
             'usuario_id' => $conductor->id,
             'funcion' => FuncionPersonalViaje::CONDUCTOR,
@@ -133,6 +172,10 @@ class CrearViajeProgramable
             'activo' => true,
         ]);
 
-        return $viaje->fresh();
+       return $viaje
+        ->fresh()
+        ->load([
+            'puntosViaje'
+        ]);
     }
 }
