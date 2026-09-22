@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\TipoAsiento;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Representa un asiento congelado dentro de un viaje.
@@ -63,5 +64,16 @@ class AsientoViaje extends Model
     public function asiento(): BelongsTo
     {
         return $this->belongsTo(Asiento::class);
+    }
+
+    /**
+     * Ocupaciones donde participa
+     * este asiento.
+     */
+    public function ocupaciones(): HasMany
+    {
+        return $this->hasMany(
+            OcupacionAsiento::class
+        );
     }
 }

@@ -126,38 +126,38 @@ class CrearViajeProgramable
                 $salida->copy()->addMinutes(360),
         ]);
 
-        PuntoViaje::create([
+        // PuntoViaje::create([
 
-            'viaje_id'=>$viaje->id,
+        //     'viaje_id'=>$viaje->id,
 
-            'punto_id'=>$origen->id,
+        //     'punto_id'=>$origen->id,
 
-            'orden'=>1,
+        //     'orden'=>1,
 
-            'permite_embarque'=>true,
+        //     'permite_embarque'=>true,
 
-            'permite_desembarque'=>false,
+        //     'permite_desembarque'=>false,
 
-            'minutos_desde_origen'=>0,
+        //     'minutos_desde_origen'=>0,
 
-        ]);
+        // ]);
 
 
-        PuntoViaje::create([
+        // PuntoViaje::create([
 
-            'viaje_id'=>$viaje->id,
+        //     'viaje_id'=>$viaje->id,
 
-            'punto_id'=>$destino->id,
+        //     'punto_id'=>$destino->id,
 
-            'orden'=>2,
+        //     'orden'=>2,
 
-            'permite_embarque'=>false,
+        //     'permite_embarque'=>false,
 
-            'permite_desembarque'=>true,
+        //     'permite_desembarque'=>true,
 
-            'minutos_desde_origen'=>360,
+        //     'minutos_desde_origen'=>360,
 
-        ]);
+        // ]);
 
         $viaje->personal()->create([
             'usuario_id' => $conductor->id,

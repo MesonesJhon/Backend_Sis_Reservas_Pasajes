@@ -9,6 +9,9 @@ use Database\Seeders\TestingSeeder;
 
 use Tests\Helpers\CrearViajeProgramable;
 
+use App\Models\Rol;
+use App\Models\Usuario;
+
 
 uses(RefreshDatabase::class);
 
@@ -27,6 +30,26 @@ beforeEach(function () {
     $this->seed([
         TestingSeeder::class,
     ]);
+
+
+    $admin = Usuario::factory()->create([
+        'activo'=>true,
+    ]);
+
+
+    $admin->roles()->attach(
+
+        Rol::where('nombre','ADMINISTRADOR')
+            ->firstOrFail()
+            ->id
+
+    );
+
+
+    $this->actingAs(
+        $admin,
+        'sanctum'
+    );
 
 });
 
@@ -51,9 +74,15 @@ test('puede consultar viajes programados por fecha', function () {
     );
 
 
-    $viaje->update([
-        'estado' => EstadoViaje::PROGRAMADO
-    ]);
+    $this->patchJson(
+        "/api/v1/viajes/{$viaje->id}/estado",
+        [
+            'estado'=>'PROGRAMADO'
+        ]
+    )->assertOk();
+
+
+    $viaje = $viaje->fresh();
 
 
 
@@ -105,9 +134,15 @@ test('la búsqueda solamente devuelve viajes programados', function () {
         CrearViajeProgramable::ejecutar();
 
 
-    $programado->update([
-        'estado'=>EstadoViaje::PROGRAMADO
-    ]);
+    $this->patchJson(
+        "/api/v1/viajes/{$programado->id}/estado",
+        [
+            'estado'=>'PROGRAMADO'
+        ]
+    )->assertOk();
+
+
+    $programado = $programado->fresh();
 
 
 
@@ -176,9 +211,15 @@ test('no devuelve viajes de otra fecha', function () {
 
 
 
-    $viaje->update([
-        'estado'=>EstadoViaje::PROGRAMADO
-    ]);
+    $this->patchJson(
+        "/api/v1/viajes/{$viaje->id}/estado",
+        [
+            'estado'=>'PROGRAMADO'
+        ]
+    )->assertOk();
+
+
+    $viaje = $viaje->fresh();
 
 
 

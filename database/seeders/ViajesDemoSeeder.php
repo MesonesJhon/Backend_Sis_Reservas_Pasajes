@@ -2,8 +2,12 @@
 
 namespace Database\Seeders;
 
+
+use App\Actions\Viajes\CambiarEstadoViaje;
+
 use App\Enums\EstadoVehiculo;
 use App\Enums\EstadoViaje;
+
 use App\Models\Asiento;
 use App\Models\Punto;
 use App\Models\PuntoRuta;
@@ -12,14 +16,44 @@ use App\Models\TarifaViaje;
 use App\Models\TipoVehiculo;
 use App\Models\Vehiculo;
 use App\Models\Viaje;
+
+use App\Models\Usuario;
+use App\Models\Rol;
+use App\Models\PersonalViaje;
+
+use App\Enums\FuncionPersonalViaje;
 use Illuminate\Database\Seeder;
+
 
 
 class ViajesDemoSeeder extends Seeder
 {
 
-    public function run(): void
+
+    /**
+     * Ejecuta la creación de datos demo.
+     *
+     * Este Seeder respeta el flujo real del sistema:
+     *
+     * BORRADOR
+     *
+     *      |
+     *      |
+     *      ▼
+     *
+     * PROGRAMADO
+     *
+     * Durante la programación se generan:
+     *
+     * - puntos_viaje
+     * - asientos_viaje
+     *
+     */
+    public function run(
+        CambiarEstadoViaje $cambiarEstadoViaje
+    ): void
     {
+
 
         /*
         |--------------------------------------------------------------------------
@@ -139,6 +173,7 @@ class ViajesDemoSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
+
         $ruta = Ruta::create([
 
             'codigo' => 'RUT-001',
@@ -160,6 +195,7 @@ class ViajesDemoSeeder extends Seeder
         | 3. CONFIGURACIÓN DEL RECORRIDO
         |--------------------------------------------------------------------------
         */
+
 
         PuntoRuta::create([
 
@@ -235,11 +271,14 @@ class ViajesDemoSeeder extends Seeder
 
 
 
+
+
         /*
         |--------------------------------------------------------------------------
         | 4. VEHÍCULO
         |--------------------------------------------------------------------------
         */
+
 
         $tipoVehiculo = TipoVehiculo::firstOrFail();
 
@@ -281,11 +320,14 @@ class ViajesDemoSeeder extends Seeder
 
 
 
+
+
         /*
         |--------------------------------------------------------------------------
         | 5. ASIENTOS DEL VEHÍCULO
         |--------------------------------------------------------------------------
         */
+
 
         for ($i = 1; $i <= 40; $i++) {
 
@@ -302,7 +344,7 @@ class ViajesDemoSeeder extends Seeder
 
                 'fila' => ceil($i / 4),
 
-                'columna' => ($i % 4) + 1,
+                'columna' => (($i - 1) % 4) + 1,
 
                 'tipo' => 'NORMAL',
 
@@ -314,15 +356,58 @@ class ViajesDemoSeeder extends Seeder
 
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | CREACIÓN DEL CONDUCTOR
+        |--------------------------------------------------------------------------
+        |
+        | El viaje necesita un conductor activo
+        | para poder pasar a PROGRAMADO.
+        |
+        */
+
+
+        $rolConductor = Rol::where(
+            'nombre',
+            'CONDUCTOR'
+        )->firstOrFail();
+
+
+
+        $conductor = Usuario::create([
+
+            'nombres' => 'Carlos',
+
+            'apellidos' => 'Conductor',
+
+            'correo' => 'conductor.demo@test.com',
+
+            'contrasena' => bcrypt('password'),
+
+            'activo' => true,
+
+        ]);
+
+
+
+        $conductor->roles()->attach(
+            $rolConductor->id
+        );
+
+
 
 
 
 
         /*
         |--------------------------------------------------------------------------
-        | 6. VIAJE PROGRAMADO
+        | 6. CREACIÓN DEL VIAJE
         |--------------------------------------------------------------------------
+        |
+        | Todo viaje nace como BORRADOR.
+        |
         */
+
 
         $viaje = Viaje::create([
 
@@ -336,7 +421,27 @@ class ViajesDemoSeeder extends Seeder
 
             'llegada_estimada' => '2026-10-10 14:00:00',
 
-            'estado' => EstadoViaje::PROGRAMADO,
+            'estado' => EstadoViaje::BORRADOR,
+
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | ASIGNACIÓN DE PERSONAL
+        |--------------------------------------------------------------------------
+        |
+        | Se asigna el conductor antes de programar.
+        |
+        */
+
+
+        PersonalViaje::create([
+
+            'viaje_id' => $viaje->id,
+
+            'usuario_id' => $conductor->id,
+
+            'funcion' => FuncionPersonalViaje::CONDUCTOR,
 
         ]);
 
@@ -349,6 +454,7 @@ class ViajesDemoSeeder extends Seeder
         | 7. TARIFAS POR SEGMENTO
         |--------------------------------------------------------------------------
         */
+
 
         TarifaViaje::create([
 
@@ -380,5 +486,36 @@ class ViajesDemoSeeder extends Seeder
 
         ]);
 
+
+
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | 8. PROGRAMAR VIAJE
+        |--------------------------------------------------------------------------
+        |
+        | Aquí se ejecuta:
+        |
+        | - Validación de negocio
+        | - Consolidación del recorrido
+        | - Consolidación de asientos
+        |
+        */
+
+
+        $cambiarEstadoViaje->ejecutar(
+
+            $viaje,
+
+            EstadoViaje::PROGRAMADO
+
+        );
+
+
     }
+
+
 }

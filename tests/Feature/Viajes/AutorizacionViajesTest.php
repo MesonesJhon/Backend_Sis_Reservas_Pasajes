@@ -11,20 +11,20 @@ beforeEach(function () {
     $this->seed();
 });
 
-function usuarioConRolViajes(string $rol): Usuario
-{
-    $usuario = Usuario::factory()->create([
-        'activo' => true,
-    ]);
+// function usuarioConRolViajes(string $rol): Usuario
+// {
+//     $usuario = Usuario::factory()->create([
+//         'activo' => true,
+//     ]);
 
-    $usuario->roles()->attach(
-        Rol::where('nombre', $rol)
-            ->firstOrFail()
-            ->id
-    );
+//     $usuario->roles()->attach(
+//         Rol::where('nombre', $rol)
+//             ->firstOrFail()
+//             ->id
+//     );
 
-    return $usuario;
-}
+//     return $usuario;
+// }
 
 test('una peticion sin autenticacion recibe 401', function () {
     $this->getJson('/api/v1/viajes')

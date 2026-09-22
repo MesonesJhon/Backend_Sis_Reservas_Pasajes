@@ -12,5 +12,7 @@ require_once __DIR__.'/Helpers/UsuariosTest.php';
 */
 
 pest()
-    ->extend(Tests\TestCase::class)
+    ->extend(Tests\TestCase::class,
+    Illuminate\Foundation\Testing\RefreshDatabase::class)
+
     ->in('Feature');

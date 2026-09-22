@@ -133,4 +133,15 @@ class Viaje extends Model
     {
         return $this->hasMany(AsientoViaje::class);
     }
+
+    /**
+     * Ocupaciones comerciales
+     * generadas sobre este viaje.
+     */
+    public function ocupacionesAsientos(): HasMany
+    {
+        return $this->hasMany(
+            OcupacionAsiento::class
+        );
+    }
 }
