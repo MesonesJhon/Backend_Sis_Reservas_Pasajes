@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+
     $this->seed();
 
     $this->administrador = Usuario::factory()->create([
@@ -91,6 +92,7 @@ function recorridoValido($test): array
 }
 
 test('administrador puede configurar recorrido valido', function () {
+
     $response = $this->putJson(
         "/api/v1/rutas/{$this->ruta->id}/recorrido",
         [
@@ -116,6 +118,7 @@ test('administrador puede configurar recorrido valido', function () {
 });
 
 test('recorrido debe tener minimo dos puntos', function () {
+
     $response = $this->putJson(
         "/api/v1/rutas/{$this->ruta->id}/recorrido",
         [
@@ -137,10 +140,10 @@ test('recorrido debe tener minimo dos puntos', function () {
 });
 
 test('no permite puntos repetidos en el recorrido', function () {
+
     $recorrido = recorridoValido($this);
 
-    $recorrido[2]['punto_id'] =
-        $this->lambayeque->id;
+    $recorrido[2]['punto_id'] = $this->lambayeque->id;
 
     $this->putJson(
         "/api/v1/rutas/{$this->ruta->id}/recorrido",
@@ -152,6 +155,7 @@ test('no permite puntos repetidos en el recorrido', function () {
 });
 
 test('no permite ordenes repetidos', function () {
+
     $recorrido = recorridoValido($this);
 
     $recorrido[2]['orden'] = 2;
@@ -166,6 +170,7 @@ test('no permite ordenes repetidos', function () {
 });
 
 test('orden del recorrido debe ser consecutivo', function () {
+
     $recorrido = recorridoValido($this);
 
     $recorrido[2]['orden'] = 4;
@@ -181,6 +186,7 @@ test('orden del recorrido debe ser consecutivo', function () {
 });
 
 test('origen debe permitir embarque', function () {
+
     $recorrido = recorridoValido($this);
 
     $recorrido[0]['permite_embarque'] = false;
@@ -200,6 +206,7 @@ test('origen debe permitir embarque', function () {
 });
 
 test('origen debe comenzar en minuto cero', function () {
+
     $recorrido = recorridoValido($this);
 
     $recorrido[0]['minutos_desde_origen'] = 10;
@@ -214,6 +221,7 @@ test('origen debe comenzar en minuto cero', function () {
 });
 
 test('destino debe permitir desembarque', function () {
+
     $recorrido = recorridoValido($this);
 
     $recorrido[3]['permite_embarque'] = true;
@@ -233,6 +241,7 @@ test('destino debe permitir desembarque', function () {
 });
 
 test('cada punto debe permitir alguna operacion', function () {
+
     $recorrido = recorridoValido($this);
 
     $recorrido[2]['permite_embarque'] = false;
@@ -248,6 +257,7 @@ test('cada punto debe permitir alguna operacion', function () {
 });
 
 test('tiempos deben aumentar progresivamente', function () {
+
     $recorrido = recorridoValido($this);
 
     $recorrido[2]['minutos_desde_origen'] = 20;
@@ -262,6 +272,7 @@ test('tiempos deben aumentar progresivamente', function () {
 });
 
 test('tiempo del destino debe coincidir con duracion de ruta', function () {
+
     $recorrido = recorridoValido($this);
 
     $recorrido[3]['minutos_desde_origen'] = 350;
@@ -276,6 +287,7 @@ test('tiempo del destino debe coincidir con duracion de ruta', function () {
 });
 
 test('punto inactivo no puede agregarse al recorrido', function () {
+
     $this->olmos->update([
         'activo' => false,
     ]);
@@ -293,6 +305,7 @@ test('punto inactivo no puede agregarse al recorrido', function () {
 });
 
 test('configuracion invalida no elimina recorrido existente', function () {
+
     $this->putJson(
         "/api/v1/rutas/{$this->ruta->id}/recorrido",
         [
@@ -316,7 +329,7 @@ test('configuracion invalida no elimina recorrido existente', function () {
         ]
     )->assertUnprocessable();
 
-    /*
+    /**
      * Como la validación ocurre antes de borrar el recorrido,
      * la configuración anterior debe permanecer intacta.
      */

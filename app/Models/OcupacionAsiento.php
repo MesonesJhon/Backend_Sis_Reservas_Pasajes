@@ -30,6 +30,8 @@ class OcupacionAsiento extends Model
 
     protected $fillable = [
 
+        'usuario_id',
+
         'viaje_id',
 
         'asiento_viaje_id',
@@ -108,6 +110,19 @@ class OcupacionAsiento extends Model
         return $this->belongsTo(
             Punto::class,
             'punto_destino_id'
+        );
+    }
+
+    /**
+     * Usuario propietario de la ocupación.
+     *
+     * Es quien seleccionó originalmente
+     * el asiento durante el proceso de compra.
+     */
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(
+            Usuario::class
         );
     }
 

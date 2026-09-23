@@ -89,4 +89,14 @@ class Usuario extends Authenticatable
             PersonalViaje::class
         );
     }
+
+    /**
+     * Ocupaciones de asientos creadas por el usuario.
+     */
+    public function ocupacionesAsientos(): HasMany
+    {
+        return $this->hasMany(
+            OcupacionAsiento::class
+        );
+    }
 }

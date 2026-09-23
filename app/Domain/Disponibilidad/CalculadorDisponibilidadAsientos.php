@@ -65,14 +65,48 @@ class CalculadorDisponibilidadAsientos
                         'asiento_viaje_id',
                         $asiento->id
                     )
-                    ->whereIn(
-                        'estado',
-                        [
-                            EstadoOcupacionAsiento::BLOQUEADO,
-                            EstadoOcupacionAsiento::RESERVADO,
-                            EstadoOcupacionAsiento::CONFIRMADO,
-                        ]
-                    )
+                    ->where(function ($consulta) {
+
+                        /*
+                        * RESERVADO y CONFIRMADO
+                        * siempre ocupan el asiento.
+                        */
+                        $consulta->whereIn(
+                            'estado',
+                            [
+                                EstadoOcupacionAsiento::RESERVADO->value,
+                                EstadoOcupacionAsiento::CONFIRMADO->value,
+                            ]
+                        )
+
+                        /*
+                        * BLOQUEADO solamente ocupa si
+                        * todavía no ha expirado.
+                        */
+                        ->orWhere(function ($bloqueos) {
+
+                            $bloqueos
+                                ->where(
+                                    'estado',
+                                    EstadoOcupacionAsiento::BLOQUEADO->value
+                                )
+                                ->where(function ($vigencia) {
+
+                                    /*
+                                    * Un bloqueo sin fecha de expiración
+                                    * se trata de forma conservadora
+                                    * como todavía vigente.
+                                    */
+                                    $vigencia
+                                        ->whereNull('expira_en')
+                                        ->orWhere(
+                                            'expira_en',
+                                            '>',
+                                            now()
+                                        );
+                                });
+                        });
+                    })
                     ->get()
                     ->contains(function ($ocupacion) use (
                         $viaje,
