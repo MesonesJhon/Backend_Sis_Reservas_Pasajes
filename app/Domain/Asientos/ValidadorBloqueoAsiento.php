@@ -103,35 +103,110 @@ class ValidadorBloqueoAsiento
 
 
        $ordenOrigenNuevo =
-    $this->ordenPunto->obtener(
-        $viaje,
-        $origenId
-    );
+        $this->ordenPunto->obtener(
+            $viaje,
+            $origenId
+        );
 
 
-$ordenDestinoNuevo =
-    $this->ordenPunto->obtener(
-        $viaje,
-        $destinoId
-    );
+        $ordenDestinoNuevo =
+        $this->ordenPunto->obtener(
+            $viaje,
+            $destinoId
+        );
 
 
-$ocupaciones =
-    $viaje
-        ->ocupacionesAsientos()
-        ->where(
-            'asiento_viaje_id',
-            $asientoViajeId
-        )
-        ->whereIn(
-            'estado',
-            [
-                EstadoOcupacionAsiento::BLOQUEADO,
-                EstadoOcupacionAsiento::RESERVADO,
-                EstadoOcupacionAsiento::CONFIRMADO,
-            ]
-        )
-        ->get();
+        $ocupaciones =
+        $viaje
+            ->ocupacionesAsientos()
+
+            ->where(
+                'asiento_viaje_id',
+                $asientoViajeId
+            )
+
+            ->where(
+                function ($consulta) {
+
+                    /*
+                    * CONFIRMADO siempre ocupa.
+                    */
+                    $consulta->where(
+                        'estado',
+                        EstadoOcupacionAsiento::CONFIRMADO->value
+                    );
+
+
+                    /*
+                    * RESERVADO solo ocupa mientras
+                    * siga vigente.
+                    *
+                    * NULL mantiene compatibilidad
+                    * con reservas creadas directamente
+                    * durante RF-06.
+                    */
+                    $consulta->orWhere(
+                        function ($reservadas) {
+
+                            $reservadas
+                                ->where(
+                                    'estado',
+                                    EstadoOcupacionAsiento::RESERVADO->value
+                                )
+
+                                ->where(
+                                    function ($vigencia) {
+
+                                        $vigencia
+                                            ->whereNull(
+                                                'expira_en'
+                                            )
+
+                                            ->orWhere(
+                                                'expira_en',
+                                                '>',
+                                                now()
+                                            );
+                                    }
+                                );
+                        }
+                    );
+
+
+                    /*
+                    * BLOQUEADO solamente ocupa
+                    * si todavía está vigente.
+                    */
+                    $consulta->orWhere(
+                        function ($bloqueos) {
+
+                            $bloqueos
+                                ->where(
+                                    'estado',
+                                    EstadoOcupacionAsiento::BLOQUEADO->value
+                                )
+
+                                ->where(
+                                    function ($vigencia) {
+
+                                        $vigencia
+                                            ->whereNull(
+                                                'expira_en'
+                                            )
+
+                                            ->orWhere(
+                                                'expira_en',
+                                                '>',
+                                                now()
+                                            );
+                                    }
+                                );
+                        }
+                    );
+                }
+            )
+
+            ->get();
 
 
 

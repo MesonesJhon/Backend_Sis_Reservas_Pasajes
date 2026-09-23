@@ -144,4 +144,15 @@ class Viaje extends Model
             OcupacionAsiento::class
         );
     }
+
+    /**
+     * Reservas comerciales registradas
+     * para este viaje.
+     */
+    public function reservas(): HasMany
+    {
+        return $this->hasMany(
+            Reserva::class
+        );
+    }
 }

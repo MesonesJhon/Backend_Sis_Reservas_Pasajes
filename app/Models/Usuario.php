@@ -99,4 +99,34 @@ class Usuario extends Authenticatable
             OcupacionAsiento::class
         );
     }
+
+    /**
+     * Reservas donde este usuario
+     * figura como cliente propietario.
+     */
+    public function reservasComoCliente(): HasMany
+    {
+        return $this->hasMany(
+            Reserva::class,
+            'cliente_usuario_id'
+        );
+    }
+
+
+    /**
+     * Reservas que fueron registradas
+     * por este usuario.
+     *
+     * Puede tratarse de:
+     *
+     * - un CLIENTE creando su propia reserva;
+     * - un OPERADOR registrando una venta presencial.
+     */
+    public function reservasCreadas(): HasMany
+    {
+        return $this->hasMany(
+            Reserva::class,
+            'creado_por_usuario_id'
+        );
+    }
 }

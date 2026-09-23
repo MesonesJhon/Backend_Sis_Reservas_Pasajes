@@ -106,6 +106,10 @@ class RolesPermisosSeeder extends Seeder
                 'nombre' => 'reservas.cancelar',
                 'descripcion' => 'Permite cancelar reservas.',
             ],
+            [
+                'nombre' => 'reservas.confirmar',
+                'descripcion' => 'Permite confirmar reservas.',
+            ],
 
             /*
             |--------------------------------------------------------------------------
@@ -322,6 +326,7 @@ class RolesPermisosSeeder extends Seeder
                 'reservas.ver',
                 'reservas.crear',
                 'reservas.cancelar',
+                'reservas.confirmar',
 
                 'tickets.ver',
                 'tickets.emitir',
@@ -376,6 +381,7 @@ class RolesPermisosSeeder extends Seeder
         $this->sincronizarPermisos(
             $cliente,
             [
+                'reservas.ver',
                 'reservas.crear',
                 'reservas.cancelar',
                 'tickets.ver',

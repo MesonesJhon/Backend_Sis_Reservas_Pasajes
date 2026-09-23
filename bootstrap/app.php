@@ -5,6 +5,7 @@ use App\Exceptions\OperacionAsientoInvalidaException;
 use App\Exceptions\OperacionUsuarioNoPermitidaException;
 use App\Exceptions\ProgramacionViajeInvalidaException;
 use App\Exceptions\RecorridoRutaInvalidoException;
+use App\Exceptions\OperacionReservaInvalidaException;
 use App\Http\Middleware\VerificarPermiso;
 use App\Http\Middleware\VerificarRol;
 use Illuminate\Foundation\Application;
@@ -139,6 +140,22 @@ return Application::configure(
 
         $exceptions->render(function (
             OperacionAsientoInvalidaException $exception,
+            Request $request
+        ) {
+            return response()->json([
+                'mensaje' => $exception->getMessage(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RF-07 - Operaciones de reservas
+        |--------------------------------------------------------------------------
+        */
+
+        $exceptions->render(function (
+            OperacionReservaInvalidaException $exception,
             Request $request
         ) {
             return response()->json([

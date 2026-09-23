@@ -68,44 +68,101 @@ class CalculadorDisponibilidadAsientos
                     ->where(function ($consulta) {
 
                         /*
-                        * RESERVADO y CONFIRMADO
-                        * siempre ocupan el asiento.
+                        |--------------------------------------------------------------------------
+                        | CONFIRMADO
+                        |--------------------------------------------------------------------------
+                        |
+                        | Siempre ocupa el asiento.
+                        |
                         */
-                        $consulta->whereIn(
+
+                        $consulta->where(
                             'estado',
-                            [
-                                EstadoOcupacionAsiento::RESERVADO->value,
-                                EstadoOcupacionAsiento::CONFIRMADO->value,
-                            ]
-                        )
+                            EstadoOcupacionAsiento::CONFIRMADO->value
+                        );
+
 
                         /*
-                        * BLOQUEADO solamente ocupa si
-                        * todavía no ha expirado.
+                        |--------------------------------------------------------------------------
+                        | RESERVADO
+                        |--------------------------------------------------------------------------
+                        |
+                        | Caso RF-06 antiguo:
+                        |
+                        | expira_en = NULL
+                        | -> sigue ocupando.
+                        |
+                        | Caso RF-07:
+                        |
+                        | expira_en futura
+                        | -> sigue ocupando.
+                        |
+                        | expira_en vencida
+                        | -> deja de ocupar inmediatamente.
+                        |
                         */
-                        ->orWhere(function ($bloqueos) {
 
-                            $bloqueos
-                                ->where(
-                                    'estado',
-                                    EstadoOcupacionAsiento::BLOQUEADO->value
-                                )
-                                ->where(function ($vigencia) {
+                        $consulta->orWhere(
+                            function ($reservadas) {
 
-                                    /*
-                                    * Un bloqueo sin fecha de expiración
-                                    * se trata de forma conservadora
-                                    * como todavía vigente.
-                                    */
-                                    $vigencia
-                                        ->whereNull('expira_en')
-                                        ->orWhere(
-                                            'expira_en',
-                                            '>',
-                                            now()
-                                        );
-                                });
-                        });
+                                $reservadas
+                                    ->where(
+                                        'estado',
+                                        EstadoOcupacionAsiento::RESERVADO->value
+                                    )
+                                    ->where(
+                                        function ($vigencia) {
+
+                                            $vigencia
+                                                ->whereNull(
+                                                    'expira_en'
+                                                )
+
+                                                ->orWhere(
+                                                    'expira_en',
+                                                    '>',
+                                                    now()
+                                                );
+                                        }
+                                    );
+                            }
+                        );
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | BLOQUEADO
+                        |--------------------------------------------------------------------------
+                        |
+                        | Solamente ocupa mientras siga vigente.
+                        |
+                        */
+
+                        $consulta->orWhere(
+                            function ($bloqueos) {
+
+                                $bloqueos
+                                    ->where(
+                                        'estado',
+                                        EstadoOcupacionAsiento::BLOQUEADO->value
+                                    )
+                                    ->where(
+                                        function ($vigencia) {
+
+                                            $vigencia
+                                                ->whereNull(
+                                                    'expira_en'
+                                                )
+
+                                                ->orWhere(
+                                                    'expira_en',
+                                                    '>',
+                                                    now()
+                                                );
+                                        }
+                                    );
+                            }
+                        );
                     })
                     ->get()
                     ->contains(function ($ocupacion) use (

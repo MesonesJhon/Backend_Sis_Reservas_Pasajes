@@ -32,6 +32,8 @@ class OcupacionAsiento extends Model
 
         'usuario_id',
 
+        'reserva_id',
+
         'viaje_id',
 
         'asiento_viaje_id',
@@ -123,6 +125,21 @@ class OcupacionAsiento extends Model
     {
         return $this->belongsTo(
             Usuario::class
+        );
+    }
+
+
+    /**
+     * Reserva comercial a la que pertenece
+     * la ocupación.
+     *
+     * Puede ser NULL mientras el asiento
+     * solamente se encuentre BLOQUEADO.
+     */
+    public function reserva(): BelongsTo
+    {
+        return $this->belongsTo(
+            Reserva::class
         );
     }
 
