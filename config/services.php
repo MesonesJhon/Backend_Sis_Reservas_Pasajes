@@ -35,4 +35,110 @@ return [
         ],
     ],
 
+
+    'mercadopago' => [
+
+        /*
+        |--------------------------------------------------------------------------
+        | API
+        |--------------------------------------------------------------------------
+        */
+
+        'base_url' =>
+            env(
+                'MERCADOPAGO_BASE_URL',
+                'https://api.mercadopago.com'
+            ),
+
+        /*
+        * Credencial privada.
+        *
+        * Solamente backend.
+        */
+        'access_token' =>
+            env(
+                'MERCADOPAGO_ACCESS_TOKEN'
+            ),
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Empresa
+        |--------------------------------------------------------------------------
+        |
+        | Se utilizará como compañía responsable
+        | del viaje enviado a Mercado Pago.
+        |
+        */
+
+        'company' =>
+            env(
+                'MERCADOPAGO_COMPANY',
+                env(
+                    'APP_NAME',
+                    'Reservas Pasajes'
+                )
+            ),
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | URLs WEB
+        |--------------------------------------------------------------------------
+        */
+
+        'web' => [
+
+            'success_url' =>
+                env(
+                    'MERCADOPAGO_WEB_SUCCESS_URL'
+                ),
+
+            'failure_url' =>
+                env(
+                    'MERCADOPAGO_WEB_FAILURE_URL'
+                ),
+
+            'pending_url' =>
+                env(
+                    'MERCADOPAGO_WEB_PENDING_URL'
+                ),
+        ],
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | URLs MOBILE
+        |--------------------------------------------------------------------------
+        |
+        | Funcionarán posteriormente como Deep Links.
+        |
+        */
+
+        'mobile' => [
+
+            'success_url' =>
+                env(
+                    'MERCADOPAGO_MOBILE_SUCCESS_URL'
+                ),
+
+            'failure_url' =>
+                env(
+                    'MERCADOPAGO_MOBILE_FAILURE_URL'
+                ),
+
+            'pending_url' =>
+                env(
+                    'MERCADOPAGO_MOBILE_PENDING_URL'
+                ),
+        ],
+
+
+
+        'webhook_secret' =>
+            env(
+                'MERCADOPAGO_WEBHOOK_SECRET'
+            ),
+    ],
+
 ];

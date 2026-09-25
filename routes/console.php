@@ -40,3 +40,36 @@ Schedule::command(
 )
     ->everyMinute()
     ->withoutOverlapping();
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Reconciliación de pagos
+|--------------------------------------------------------------------------
+|
+| Se ejecuta cada minuto.
+|
+| El propio comando solamente selecciona pagos
+| que no hayan sido verificados recientemente.
+|
+| withoutOverlapping evita que dos ejecuciones
+| del reconciliador se pisen entre sí.
+|
+*/
+
+Schedule::command(
+    'pagos:reconciliar-pendientes',
+    [
+        '--antiguedad' =>
+            1,
+
+        '--limite' =>
+            100,
+    ]
+)
+    ->everyMinute()
+
+    ->withoutOverlapping(
+        5
+    );

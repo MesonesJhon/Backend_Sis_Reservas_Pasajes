@@ -270,6 +270,17 @@ class RolesPermisosSeeder extends Seeder
             ],
 
 
+            //PERMISOS DE PAGOS
+            [
+                'nombre' => 'pagos.ver',
+                'descripcion' => 'Permite consultar los pagos.',
+            ],
+            [
+                'nombre' => 'pagos.crear',
+                'descripcion' => 'Permite crear pagos.',
+            ],
+
+
         ];
 
         foreach ($permisos as $permiso) {
@@ -348,6 +359,9 @@ class RolesPermisosSeeder extends Seeder
 
                 'tarifas.ver',
                 'tarifas.configurar',
+
+                'pagos.ver',
+                'pagos.crear',
             ]
         );
 
@@ -385,6 +399,8 @@ class RolesPermisosSeeder extends Seeder
                 'reservas.crear',
                 'reservas.cancelar',
                 'tickets.ver',
+                'pagos.ver',
+                'pagos.crear',
             ]
         );
     }

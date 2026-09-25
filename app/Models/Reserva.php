@@ -32,6 +32,8 @@ class Reserva extends Model
 
         'viaje_id',
 
+        'pago_confirmacion_id',
+
         'cliente_usuario_id',
 
         'creado_por_usuario_id',
@@ -162,5 +164,30 @@ class Reserva extends Model
     {
         return $this->expira_en !== null
             && $this->expira_en->isPast();
+    }
+
+
+    /**
+     * Intentos de pago realizados
+     * para esta reserva.
+     */
+    public function pagos(): HasMany
+    {
+        return $this->hasMany(
+            Pago::class
+        );
+    }
+
+
+    /**
+     * Pago electrónico que produjo
+     * la confirmación definitiva.
+     */
+    public function pagoConfirmacion(): BelongsTo
+    {
+        return $this->belongsTo(
+            Pago::class,
+            'pago_confirmacion_id'
+        );
     }
 }

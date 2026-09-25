@@ -20,4 +20,5 @@ Route::prefix('v1')->group(function () {
     require __DIR__.'/api/v1/busqueda.php';
     require __DIR__.'/api/v1/asientos.php';
     require __DIR__.'/api/v1/reservas.php';
+    require __DIR__.'/api/v1/pagos.php';
 });

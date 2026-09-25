@@ -10,6 +10,8 @@ use App\Exceptions\OperacionUsuarioNoPermitidaException;
 use App\Models\OcupacionAsiento;
 use App\Models\Reserva;
 use App\Models\Usuario;
+use App\Enums\EstadoPago;
+use App\Models\Pago;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -110,6 +112,64 @@ class CancelarReserva
                     throw new OperacionReservaInvalidaException(
                         'La reserva no puede cancelarse desde su estado actual.'
                     );
+                }
+
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Proteger reservas pagadas electrónicamente
+                |--------------------------------------------------------------------------
+                |
+                | Una reserva CONFIRMADA mediante un pago electrónico
+                | no puede cancelarse simplemente liberando el asiento.
+                |
+                | Primero debe existir una devolución real del dinero.
+                |
+                | Esto evita:
+                |
+                | Reserva CANCELADA
+                | Asiento LIBERADO
+                | Pago todavía APROBADO
+                |
+                */
+
+                if (
+                    $reservaBloqueada->estado
+                    === EstadoReserva::CONFIRMADA
+
+                    &&
+
+                    $reservaBloqueada->pago_confirmacion_id
+                    !== null
+                ) {
+
+                    $pagoConfirmacion =
+                        Pago::query()
+
+                            ->whereKey(
+                                $reservaBloqueada
+                                    ->pago_confirmacion_id
+                            )
+
+                            ->lockForUpdate()
+
+                            ->first();
+
+
+                    if (
+                        $pagoConfirmacion !== null
+
+                        &&
+
+                        $pagoConfirmacion->estado
+                        === EstadoPago::APROBADO
+                    ) {
+
+                        throw new OperacionReservaInvalidaException(
+                            'La reserva posee un pago electrónico aprobado. Debe procesarse el reembolso antes de cancelar la reserva.'
+                        );
+                    }
                 }
 
 

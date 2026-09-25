@@ -6,6 +6,9 @@ use App\Exceptions\OperacionUsuarioNoPermitidaException;
 use App\Exceptions\ProgramacionViajeInvalidaException;
 use App\Exceptions\RecorridoRutaInvalidoException;
 use App\Exceptions\OperacionReservaInvalidaException;
+use App\Exceptions\ConflictoPagoException;
+use App\Exceptions\OperacionPagoInvalidaException;
+use App\Exceptions\PasarelaPagoException;
 use App\Http\Middleware\VerificarPermiso;
 use App\Http\Middleware\VerificarRol;
 use Illuminate\Foundation\Application;
@@ -161,6 +164,57 @@ return Application::configure(
             return response()->json([
                 'mensaje' => $exception->getMessage(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RF-08 - Operaciones de pago inválidas
+        |--------------------------------------------------------------------------
+        */
+
+        $exceptions->render(function (
+            OperacionPagoInvalidaException $exception,
+            Request $request
+        ) {
+            return response()->json([
+                'mensaje' =>
+                    $exception->getMessage(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RF-08 - Conflictos
+        |--------------------------------------------------------------------------
+        */
+
+        $exceptions->render(function (
+            ConflictoPagoException $exception,
+            Request $request
+        ) {
+            return response()->json([
+                'mensaje' =>
+                    $exception->getMessage(),
+            ], Response::HTTP_CONFLICT);
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RF-08 - Proveedor externo
+        |--------------------------------------------------------------------------
+        */
+
+        $exceptions->render(function (
+            PasarelaPagoException $exception,
+            Request $request
+        ) {
+            return response()->json([
+                'mensaje' =>
+                    $exception->getMessage(),
+            ], Response::HTTP_BAD_GATEWAY);
         });
     })
 

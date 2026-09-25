@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Contracts\Pagos\PasarelaPago;
+use App\Integrations\MercadoPago\MercadoPagoGateway;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +13,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            PasarelaPago::class,
+            MercadoPagoGateway::class
+        );
     }
 
     /**

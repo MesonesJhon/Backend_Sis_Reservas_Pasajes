@@ -129,4 +129,17 @@ class Usuario extends Authenticatable
             'creado_por_usuario_id'
         );
     }
+
+
+    /**
+     * Intentos de pago iniciados
+     * por este usuario.
+     */
+    public function pagosIniciados(): HasMany
+    {
+        return $this->hasMany(
+            Pago::class,
+            'iniciado_por_usuario_id'
+        );
+    }
 }
