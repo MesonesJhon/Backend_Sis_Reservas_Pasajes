@@ -125,6 +125,13 @@ class RolesPermisosSeeder extends Seeder
                 'nombre' => 'tickets.emitir',
                 'descripcion' => 'Permite emitir tickets.',
             ],
+            [
+                'nombre' =>
+                    'tickets.validar',
+
+                'descripcion' =>
+                    'Permite validar tickets electrónicos durante el embarque.',
+            ],
 
             /*
             |--------------------------------------------------------------------------
@@ -281,6 +288,8 @@ class RolesPermisosSeeder extends Seeder
             ],
 
 
+
+
         ];
 
         foreach ($permisos as $permiso) {
@@ -341,6 +350,7 @@ class RolesPermisosSeeder extends Seeder
 
                 'tickets.ver',
                 'tickets.emitir',
+                'tickets.validar',
 
                 'manifiesto.ver',
 
@@ -385,6 +395,8 @@ class RolesPermisosSeeder extends Seeder
 
                 'viajes.ver',
                 'tarifas.ver',
+
+                'tickets.validar',
             ]
         );
 

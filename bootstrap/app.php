@@ -15,6 +15,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use App\Exceptions\OperacionTicketInvalidaException;
 use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(
@@ -215,6 +216,23 @@ return Application::configure(
                 'mensaje' =>
                     $exception->getMessage(),
             ], Response::HTTP_BAD_GATEWAY);
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RF-09 - Operaciones de tickets
+        |--------------------------------------------------------------------------
+        */
+
+        $exceptions->render(function (
+            OperacionTicketInvalidaException $exception,
+            Request $request
+        ) {
+            return response()->json([
+                'mensaje' =>
+                    $exception->getMessage(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         });
     })
 

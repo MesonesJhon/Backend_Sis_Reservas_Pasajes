@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Representa a una persona que viajará
@@ -74,6 +75,18 @@ class PasajeroReserva extends Model
     {
         return $this->belongsTo(
             OcupacionAsiento::class
+        );
+    }
+
+    /**
+     * Ticket electrónico individual
+     * correspondiente a este pasajero.
+     */
+    public function ticket(): HasOne
+    {
+        return $this->hasOne(
+            Ticket::class,
+            'pasajero_reserva_id'
         );
     }
 }

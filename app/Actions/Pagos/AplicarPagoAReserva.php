@@ -6,6 +6,7 @@ use App\Enums\EstadoOcupacionAsiento;
 use App\Enums\EstadoPago;
 use App\Enums\EstadoReserva;
 use App\Models\OcupacionAsiento;
+use App\Actions\Tickets\EmitirTicketsReserva;
 use App\Models\Pago;
 use App\Models\Reserva;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,12 @@ use Illuminate\Support\Facades\DB;
  */
 class AplicarPagoAReserva
 {
+
+    public function __construct(
+        private readonly EmitirTicketsReserva $emitirTicketsReserva
+    ) {
+    }
+
     /**
      * @return bool
      *
@@ -146,18 +153,34 @@ class AplicarPagoAReserva
                 */
 
                 if (
-                    $reserva->estado
-                    === EstadoReserva::CONFIRMADA
+                $reserva->estado
+                === EstadoReserva::CONFIRMADA
 
-                    &&
+                &&
 
-                    (int)
-                    $reserva->pago_confirmacion_id
-                    === (int)
-                    $pago->id
-                ) {
-                    return true;
-                }
+                (int)
+                $reserva->pago_confirmacion_id
+                === (int)
+                $pago->id
+            ) {
+
+                /*
+                * La confirmación financiera ya ocurrió.
+                *
+                * También garantizamos idempotentemente
+                * que todos los pasajeros tengan ticket.
+                *
+                * Esto permite reparar una emisión incompleta
+                * sin duplicar tickets.
+                */
+                $this->emitirTicketsReserva
+                    ->ejecutar(
+                        $reserva->id
+                    );
+
+
+                return true;
+            }
 
 
                 /*
@@ -460,13 +483,26 @@ class AplicarPagoAReserva
                     'confirmada_en' =>
                         now(),
 
-                    /*
-                     * Una reserva confirmada
-                     * ya no tiene vencimiento.
-                     */
                     'expira_en' =>
                         null,
                 ]);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Emitir tickets electrónicos
+                |--------------------------------------------------------------------------
+                |
+                | El Pago ya está APROBADO,
+                | la Reserva CONFIRMADA
+                | y los asientos CONFIRMADOS.
+                |
+                */
+
+                $this->emitirTicketsReserva
+                    ->ejecutar(
+                        $reserva->id
+                    );
 
 
                 return true;

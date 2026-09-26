@@ -1,5 +1,6 @@
 <?php
-
+use App\Enums\EstadoTicket;
+use App\Models\Ticket;
 use App\Enums\EstadoOcupacionAsiento;
 use App\Enums\EstadoPago;
 use App\Enums\EstadoReserva;
@@ -1615,6 +1616,30 @@ test(
         );
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | RF-09: ticket emitido
+        |--------------------------------------------------------------------------
+        */
+
+        $ticket =
+            Ticket::query()
+
+                ->where(
+                    'reserva_id',
+                    $reserva->id
+                )
+
+                ->firstOrFail();
+
+
+        expect(
+            $ticket->estado
+        )->toBe(
+            EstadoTicket::VIGENTE
+        );
+
+
         expect(
             $ocupacion->estado
         )->toBe(
@@ -1686,6 +1711,39 @@ test(
         )->toBe(
             EstadoOcupacionAsiento::LIBERADO
         );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RF-09: anulación automática
+        |--------------------------------------------------------------------------
+        */
+
+        $ticket->refresh();
+
+
+        expect(
+            $ticket->estado
+        )->toBe(
+            EstadoTicket::ANULADO
+        );
+
+
+        expect(
+            $ticket->anulado_en
+        )->not->toBeNull();
+
+
+        expect(
+            $ticket->motivo_anulacion
+        )->toContain(
+            'Reembolso total'
+        );
+
+
+        expect(
+            $ticket->validado_en
+        )->toBeNull();
 
 
         expect(

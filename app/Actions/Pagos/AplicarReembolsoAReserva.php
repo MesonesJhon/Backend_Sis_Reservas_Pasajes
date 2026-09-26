@@ -3,6 +3,7 @@
 namespace App\Actions\Pagos;
 
 use App\Enums\EstadoOcupacionAsiento;
+use App\Actions\Tickets\AnularTicketsReserva;
 use App\Enums\EstadoPago;
 use App\Enums\EstadoReserva;
 use App\Enums\EstadoViaje;
@@ -26,6 +27,13 @@ use Illuminate\Support\Facades\DB;
  */
 class AplicarReembolsoAReserva
 {
+
+    public function __construct(
+        private readonly AnularTicketsReserva $anularTicketsReserva
+    ) {
+    }
+
+
     public function ejecutar(
         int $pagoId
     ): bool {
@@ -102,15 +110,48 @@ class AplicarReembolsoAReserva
                 |--------------------------------------------------------------------------
                 */
 
+                /*
+                |--------------------------------------------------------------------------
+                | Reserva ya cancelada
+                |--------------------------------------------------------------------------
+                |
+                | Puede tratarse de un Webhook repetido.
+                |
+                | Reintentamos la anulación de tickets porque
+                | AnularTicketsReserva es idempotente.
+                |
+                */
+
                 if (
-                    in_array(
-                        $reserva->estado,
-                        [
-                            EstadoReserva::CANCELADA,
-                            EstadoReserva::EXPIRADA,
-                        ],
-                        true
-                    )
+                    $reserva->estado
+                    === EstadoReserva::CANCELADA
+                ) {
+
+                    $this
+                        ->anularTicketsReserva
+                        ->ejecutar(
+                            $reserva->id,
+                            'Reembolso total confirmado por Mercado Pago.'
+                        );
+
+
+                    return true;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Reserva expirada
+                |--------------------------------------------------------------------------
+                |
+                | Una reserva EXPIRADA normalmente nunca emitió tickets
+                | porque los tickets aparecen únicamente al confirmar.
+                |
+                */
+
+                if (
+                    $reserva->estado
+                    === EstadoReserva::EXPIRADA
                 ) {
                     return true;
                 }
@@ -248,6 +289,27 @@ class AplicarReembolsoAReserva
     private function cancelarYLiberar(
         Reserva $reserva
     ): void {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Anular tickets
+        |--------------------------------------------------------------------------
+        |
+        | Reembolso total válido:
+        |
+        | Ticket VIGENTE -> ANULADO
+        |
+        | Un ticket UTILIZADO conserva su auditoría.
+        |
+        */
+
+        $this
+            ->anularTicketsReserva
+            ->ejecutar(
+                $reserva->id,
+                'Reembolso total confirmado por Mercado Pago.'
+            );
+
 
         $ocupaciones =
             OcupacionAsiento::query()

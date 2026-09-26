@@ -190,4 +190,16 @@ class Reserva extends Model
             'pago_confirmacion_id'
         );
     }
+
+
+    /**
+     * Tickets electrónicos emitidos
+     * para los pasajeros de la reserva.
+     */
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(
+            Ticket::class
+        );
+    }
 }

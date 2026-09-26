@@ -7,6 +7,7 @@ use App\Enums\EstadoOcupacionAsiento;
 use App\Enums\EstadoReserva;
 use App\Exceptions\OperacionReservaInvalidaException;
 use App\Exceptions\OperacionUsuarioNoPermitidaException;
+use App\Actions\Tickets\EmitirTicketsReserva;
 use App\Models\OcupacionAsiento;
 use App\Models\Reserva;
 use App\Models\Usuario;
@@ -28,7 +29,8 @@ use Illuminate\Support\Facades\DB;
 class ConfirmarReserva
 {
     public function __construct(
-        private readonly ConsultaReservasAutorizadas $autorizacion
+        private readonly ConsultaReservasAutorizadas $autorizacion,
+        private readonly EmitirTicketsReserva $emitirTicketsReserva,
     ) {
     }
 
@@ -326,7 +328,26 @@ class ConfirmarReserva
 
                 /*
                 |--------------------------------------------------------------------------
-                | 10. Respuesta
+                | 10. Emitir tickets
+                |--------------------------------------------------------------------------
+                |
+                | La reserva y todas las ocupaciones ya quedaron
+                | confirmadas.
+                |
+                | Si existen varios pasajeros se genera un ticket
+                | individual para cada uno.
+                |
+                */
+
+                $this->emitirTicketsReserva
+                    ->ejecutar(
+                        $reservaBloqueada->id
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | 11. Respuesta
                 |--------------------------------------------------------------------------
                 */
 

@@ -8,6 +8,7 @@ use App\Enums\EstadoReserva;
 use App\Exceptions\OperacionReservaInvalidaException;
 use App\Exceptions\OperacionUsuarioNoPermitidaException;
 use App\Models\OcupacionAsiento;
+use App\Actions\Tickets\AnularTicketsReserva;
 use App\Models\Reserva;
 use App\Models\Usuario;
 use App\Enums\EstadoPago;
@@ -25,7 +26,8 @@ use Illuminate\Support\Facades\DB;
 class CancelarReserva
 {
     public function __construct(
-        private readonly ConsultaReservasAutorizadas $autorizacion
+        private readonly ConsultaReservasAutorizadas $autorizacion,
+        private readonly AnularTicketsReserva $anularTicketsReserva
     ) {
     }
 
@@ -171,6 +173,46 @@ class CancelarReserva
                         );
                     }
                 }
+
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Anular tickets vigentes
+                |--------------------------------------------------------------------------
+                |
+                | En ValidarTicket el orden crítico es:
+                |
+                | Reserva -> Ticket -> Ocupación
+                |
+                | Conservamos aquí el mismo orden.
+                |
+                | Si posteriormente falla la cancelación,
+                | la transacción exterior también revertirá
+                | la anulación de los tickets.
+                |
+                */
+
+                $motivoAnulacionTicket =
+                    $motivo !== null
+                    && trim(
+                        $motivo
+                    ) !== ''
+
+                        ? 'Reserva cancelada: '
+                            .trim(
+                                $motivo
+                            )
+
+                        : 'Reserva cancelada.';
+
+
+                $this
+                    ->anularTicketsReserva
+                    ->ejecutar(
+                        $reservaBloqueada->id,
+                        $motivoAnulacionTicket
+                    );
 
 
                 /*
