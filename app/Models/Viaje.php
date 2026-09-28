@@ -155,4 +155,15 @@ class Viaje extends Model
             Reserva::class
         );
     }
+
+    /**
+     * Operaciones postventa y operativas
+     * registradas para este viaje.
+     */
+        public function operacionesPostventa(): HasMany
+        {
+            return $this->hasMany(
+                OperacionPostventa::class
+            );
+        }
 }

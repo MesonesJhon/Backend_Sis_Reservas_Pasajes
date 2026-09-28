@@ -1,5 +1,7 @@
 <?php
-
+use App\Enums\OrigenOperacionPostventa;
+use App\Enums\TipoOperacionPostventa;
+use App\Models\OperacionPostventa;
 use App\Actions\Tickets\AnularTicketsReserva;
 use App\Enums\EstadoOcupacionAsiento;
 use App\Enums\EstadoReserva;
@@ -342,6 +344,82 @@ test(
         expect(
             $ticket->validado_en
         )->toBeNull();
+
+        /*
+        |--------------------------------------------------------------------------
+        | RF-10.1 - Trazabilidad
+        |--------------------------------------------------------------------------
+        */
+
+        $operacion =
+            OperacionPostventa::query()
+
+                ->where(
+                    'reserva_id',
+                    $reserva->id
+                )
+
+                ->where(
+                    'tipo',
+                    TipoOperacionPostventa::CANCELACION->value
+                )
+
+                ->firstOrFail();
+
+
+        expect(
+            $operacion->origen
+        )->toBe(
+            OrigenOperacionPostventa::USUARIO
+        );
+
+
+        expect(
+            $operacion->ejecutado_por_usuario_id
+        )->toBe(
+            $cliente->id
+        );
+
+
+        expect(
+            $operacion->viaje_id
+        )->toBe(
+            $reserva->viaje_id
+        );
+
+
+        expect(
+            $operacion->motivo
+        )->toBe(
+            'Cambio de planes'
+        );
+
+
+        expect(
+            $operacion->datos[
+                'estado_anterior'
+            ]
+        )->toBe(
+            EstadoReserva::CONFIRMADA->value
+        );
+
+
+        expect(
+            $operacion->datos[
+                'estado_nuevo'
+            ]
+        )->toBe(
+            EstadoReserva::CANCELADA->value
+        );
+
+
+        expect(
+            $operacion->datos[
+                'causa'
+            ]
+        )->toBe(
+            'CANCELACION_MANUAL'
+        );
     }
 );
 

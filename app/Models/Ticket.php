@@ -6,7 +6,7 @@ use App\Enums\EstadoTicket;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
+use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * Representa el ticket electrónico
  * individual de un pasajero.
@@ -109,5 +109,17 @@ class Ticket extends Model
     {
         return $this->estado
             === EstadoTicket::VIGENTE;
+    }
+
+
+    /**
+     * Operaciones postventa relacionadas
+     * directamente con el ticket.
+     */
+    public function operacionesPostventa(): HasMany
+    {
+        return $this->hasMany(
+            OperacionPostventa::class
+        );
     }
 }

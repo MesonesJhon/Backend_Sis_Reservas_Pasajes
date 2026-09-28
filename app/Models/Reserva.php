@@ -202,4 +202,15 @@ class Reserva extends Model
             Ticket::class
         );
     }
+
+    /**
+     * Historial consolidado de operaciones
+     * postventa asociadas a la reserva.
+     */
+        public function operacionesPostventa(): HasMany
+        {
+            return $this->hasMany(
+                OperacionPostventa::class
+            );
+        }
 }

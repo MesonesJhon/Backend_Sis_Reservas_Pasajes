@@ -1,4 +1,7 @@
 <?php
+use App\Enums\OrigenOperacionPostventa;
+use App\Enums\TipoOperacionPostventa;
+use App\Models\OperacionPostventa;
 use App\Enums\EstadoTicket;
 use App\Models\Ticket;
 use App\Enums\EstadoOcupacionAsiento;
@@ -1751,10 +1754,179 @@ test(
         )->toBeNull();
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | RF-10.1 - Evento REEMBOLSO
+        |--------------------------------------------------------------------------
+        */
+
+        $eventoReembolso =
+            OperacionPostventa::query()
+
+                ->where(
+                    'pago_id',
+                    $pago->id
+                )
+
+                ->where(
+                    'tipo',
+                    TipoOperacionPostventa::REEMBOLSO->value
+                )
+
+                ->firstOrFail();
+
+
+        expect(
+            $eventoReembolso->origen
+        )->toBe(
+            OrigenOperacionPostventa::PROVEEDOR
+        );
+
+
+        expect(
+            $eventoReembolso->reserva_id
+        )->toBe(
+            $reserva->id
+        );
+
+
+        expect(
+            $eventoReembolso->viaje_id
+        )->toBe(
+            $reserva->viaje_id
+        );
+
+
+        expect(
+            $eventoReembolso->monto
+        )->toBe(
+            $pago->monto
+        );
+
+
+        expect(
+            $eventoReembolso->moneda
+        )->toBe(
+            $pago->moneda
+        );
+
+
+        expect(
+            $eventoReembolso->datos[
+                'tipo_reembolso'
+            ]
+        )->toBe(
+            'TOTAL'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RF-10.1 - CANCELACION automática
+        |--------------------------------------------------------------------------
+        */
+
+        $eventoCancelacion =
+            OperacionPostventa::query()
+
+                ->where(
+                    'reserva_id',
+                    $reserva->id
+                )
+
+                ->where(
+                    'pago_id',
+                    $pago->id
+                )
+
+                ->where(
+                    'tipo',
+                    TipoOperacionPostventa::CANCELACION->value
+                )
+
+                ->firstOrFail();
+
+
+        expect(
+            $eventoCancelacion->origen
+        )->toBe(
+            OrigenOperacionPostventa::SISTEMA
+        );
+
+
+        expect(
+            $eventoCancelacion->datos[
+                'causa'
+            ]
+        )->toBe(
+            'REEMBOLSO_TOTAL'
+        );
+
 
         Http::assertSentCount(
             2
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reprocesar consecuencia comercial
+        |--------------------------------------------------------------------------
+        |
+        | Simula un procesamiento repetido.
+        |
+        */
+
+        app(
+            \App\Actions\Pagos\AplicarReembolsoAReserva::class
+        )
+            ->ejecutar(
+                $pago->id
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | No deben aparecer eventos duplicados
+        |--------------------------------------------------------------------------
+        */
+
+        expect(
+            OperacionPostventa::query()
+
+                ->where(
+                    'pago_id',
+                    $pago->id
+                )
+
+                ->where(
+                    'tipo',
+                    TipoOperacionPostventa::REEMBOLSO->value
+                )
+
+                ->count()
+        )->toBe(1);
+
+
+        expect(
+            OperacionPostventa::query()
+
+                ->where(
+                    'reserva_id',
+                    $reserva->id
+                )
+
+                ->where(
+                    'tipo',
+                    TipoOperacionPostventa::CANCELACION->value
+                )
+
+                ->where(
+                    'pago_id',
+                    $pago->id
+                )
+
+                ->count()
+        )->toBe(1);
     }
 );
 

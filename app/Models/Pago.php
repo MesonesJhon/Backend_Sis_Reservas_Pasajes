@@ -8,6 +8,7 @@ use App\Enums\ProveedorPago;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Representa un intento de pago de una reserva.
@@ -160,6 +161,18 @@ class Pago extends Model
                 EstadoPago::PENDIENTE,
             ],
             true
+        );
+    }
+
+
+    /**
+ * Operaciones postventa asociadas
+ * al intento de pago.
+ */
+    public function operacionesPostventa(): HasMany
+    {
+        return $this->hasMany(
+            OperacionPostventa::class
         );
     }
 }

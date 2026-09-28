@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Actions\Pagos;
-
+use App\Actions\Postventa\RegistrarOperacionPostventa;
+use App\Enums\OrigenOperacionPostventa;
+use App\Enums\TipoOperacionPostventa;
 use App\Enums\EstadoOcupacionAsiento;
 use App\Actions\Tickets\AnularTicketsReserva;
 use App\Enums\EstadoPago;
@@ -29,7 +31,8 @@ class AplicarReembolsoAReserva
 {
 
     public function __construct(
-        private readonly AnularTicketsReserva $anularTicketsReserva
+        private readonly AnularTicketsReserva $anularTicketsReserva,
+        private readonly RegistrarOperacionPostventa $registrarOperacionPostventa
     ) {
     }
 
@@ -106,6 +109,25 @@ class AplicarReembolsoAReserva
 
                 /*
                 |--------------------------------------------------------------------------
+                | RF-10.1 - Registrar reembolso financiero
+                |--------------------------------------------------------------------------
+                |
+                | Este evento representa el hecho financiero:
+                |
+                | Mercado Pago confirmó que el dinero fue reembolsado.
+                |
+                | Es distinto de que posteriormente la reserva
+                | pueda o no cancelarse comercialmente.
+                |
+                */
+
+                $this->registrarReembolso(
+                    $pago
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
                 | 4. Estados que ya no necesitan acción
                 |--------------------------------------------------------------------------
                 */
@@ -174,7 +196,8 @@ class AplicarReembolsoAReserva
                 ) {
 
                     $this->cancelarYLiberar(
-                        $reserva
+                        $reserva,
+                        $pago
                     );
 
 
@@ -252,7 +275,8 @@ class AplicarReembolsoAReserva
                 ) {
 
                     $this->cancelarYLiberar(
-                        $reserva
+                        $reserva,
+                        $pago
                     );
 
 
@@ -287,7 +311,8 @@ class AplicarReembolsoAReserva
      * y libera sus ocupaciones.
      */
     private function cancelarYLiberar(
-        Reserva $reserva
+        Reserva $reserva,
+        Pago $pago
     ): void {
 
         /*
@@ -353,6 +378,8 @@ class AplicarReembolsoAReserva
             }
         }
 
+        $estadoAnterior =
+            $reserva->estado;
 
         $reserva->update([
             'estado' =>
@@ -368,6 +395,49 @@ class AplicarReembolsoAReserva
             'expira_en' =>
                 null,
         ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RF-10.1 - Cancelación comercial por reembolso
+        |--------------------------------------------------------------------------
+        */
+
+        $this
+            ->registrarOperacionPostventa
+            ->ejecutar(
+                tipo:
+                    TipoOperacionPostventa::CANCELACION,
+
+                origen:
+                    OrigenOperacionPostventa::SISTEMA,
+
+                reservaId:
+                    $reserva->id,
+
+                pagoId:
+                    $pago->id,
+
+                motivo:
+                    'Reserva cancelada como consecuencia de un reembolso total.',
+
+                datos: [
+                    'estado_anterior' =>
+                        $estadoAnterior->value,
+
+                    'estado_nuevo' =>
+                        EstadoReserva::CANCELADA->value,
+
+                    'causa' =>
+                        'REEMBOLSO_TOTAL',
+                ],
+
+                claveIdempotencia:
+                    'postventa:cancelacion-reembolso:reserva:'
+                    .$reserva->id
+                    .':pago:'
+                    .$pago->id
+            );
     }
 
 
@@ -414,5 +484,51 @@ class AplicarReembolsoAReserva
                     )
                 ),
         ]);
+    }
+
+    private function registrarReembolso(
+        Pago $pago
+    ): void {
+
+        $this
+            ->registrarOperacionPostventa
+            ->ejecutar(
+                tipo:
+                    TipoOperacionPostventa::REEMBOLSO,
+
+                origen:
+                    OrigenOperacionPostventa::PROVEEDOR,
+
+                pagoId:
+                    $pago->id,
+
+                monto:
+                    $pago->monto,
+
+                moneda:
+                    $pago->moneda,
+
+                motivo:
+                    'Reembolso total confirmado por Mercado Pago.',
+
+                datos: [
+                    'tipo_reembolso' =>
+                        'TOTAL',
+
+                    'estado_pago' =>
+                        EstadoPago::REEMBOLSADO->value,
+
+                    'proveedor_payment_id' =>
+                        $pago->proveedor_payment_id,
+                ],
+
+                claveIdempotencia:
+                    'postventa:reembolso-total:pago:'
+                    .$pago->id,
+
+                ocurrioEn:
+                    $pago->reembolsado_en
+                    ?? now()
+            );
     }
 }

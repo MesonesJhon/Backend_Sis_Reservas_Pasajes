@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Representa a una persona que viajará
@@ -86,6 +87,18 @@ class PasajeroReserva extends Model
     {
         return $this->hasOne(
             Ticket::class,
+            'pasajero_reserva_id'
+        );
+    }
+
+    /**
+     * Historial operativo individual
+     * correspondiente al pasajero.
+     */
+    public function operacionesPostventa(): HasMany
+    {
+        return $this->hasMany(
+            OperacionPostventa::class,
             'pasajero_reserva_id'
         );
     }

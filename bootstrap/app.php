@@ -234,6 +234,23 @@ return Application::configure(
                     $exception->getMessage(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RF-10 - Operaciones postventa
+        |--------------------------------------------------------------------------
+        */
+
+        $exceptions->render(function (
+            OperacionPostventaInvalidaException $exception,
+            Request $request
+        ) {
+            return response()->json([
+                'mensaje' =>
+                    $exception->getMessage(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        });
     })
 
     ->prefersJsonResponses()

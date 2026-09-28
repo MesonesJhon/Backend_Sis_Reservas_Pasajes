@@ -142,4 +142,16 @@ class Usuario extends Authenticatable
             'iniciado_por_usuario_id'
         );
     }
+
+    /**
+     * Operaciones postventa ejecutadas
+     * directamente por este usuario.
+     */
+    public function operacionesPostventaEjecutadas(): HasMany
+    {
+        return $this->hasMany(
+            OperacionPostventa::class,
+            'ejecutado_por_usuario_id'
+        );
+    }
 }

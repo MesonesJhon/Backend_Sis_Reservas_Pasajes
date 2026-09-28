@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Actions\Reservas;
-
+use App\Actions\Postventa\RegistrarOperacionPostventa;
+use App\Enums\OrigenOperacionPostventa;
+use App\Enums\TipoOperacionPostventa;
 use App\Domain\Reservas\ConsultaReservasAutorizadas;
 use App\Enums\EstadoOcupacionAsiento;
 use App\Enums\EstadoReserva;
@@ -27,7 +29,8 @@ class CancelarReserva
 {
     public function __construct(
         private readonly ConsultaReservasAutorizadas $autorizacion,
-        private readonly AnularTicketsReserva $anularTicketsReserva
+        private readonly AnularTicketsReserva $anularTicketsReserva,
+        private readonly RegistrarOperacionPostventa $registrarOperacionPostventa
     ) {
     }
 
@@ -116,6 +119,8 @@ class CancelarReserva
                     );
                 }
 
+                $estadoAnterior =
+                    $reservaBloqueada->estado;
 
 
                 /*
@@ -302,6 +307,46 @@ class CancelarReserva
                             ? trim($motivo)
                             : null,
                 ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | RF-10.1 - Trazabilidad de cancelación
+                |--------------------------------------------------------------------------
+                */
+
+                $this
+                    ->registrarOperacionPostventa
+                    ->ejecutar(
+                        tipo:
+                            TipoOperacionPostventa::CANCELACION,
+
+                        origen:
+                            OrigenOperacionPostventa::USUARIO,
+
+                        reservaId:
+                            $reservaBloqueada->id,
+
+                        ejecutadoPorUsuarioId:
+                            $usuario->id,
+
+                        motivo:
+                            $motivo,
+
+                        datos: [
+                            'estado_anterior' =>
+                                $estadoAnterior->value,
+
+                            'estado_nuevo' =>
+                                EstadoReserva::CANCELADA->value,
+
+                            'causa' =>
+                                'CANCELACION_MANUAL',
+                        ],
+
+                        claveIdempotencia:
+                            'postventa:cancelacion:reserva:'
+                            .$reservaBloqueada->id
+                    );
 
 
                 /*
