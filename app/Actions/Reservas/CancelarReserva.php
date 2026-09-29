@@ -15,6 +15,8 @@ use App\Models\Reserva;
 use App\Models\Usuario;
 use App\Enums\EstadoPago;
 use App\Models\Pago;
+use App\Enums\EstadoReprogramacion;
+use App\Models\ReprogramacionReserva;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -121,6 +123,61 @@ class CancelarReserva
 
                 $estadoAnterior =
                     $reservaBloqueada->estado;
+
+
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | RF-10.2 - Reserva proveniente de reprogramación
+                |--------------------------------------------------------------------------
+                |
+                | Una reserva CONFIRMADA generada mediante una
+                | reprogramación no puede utilizar la cancelación
+                | tradicional.
+                |
+                | Puede contener valor económico transferido desde
+                | una reserva pagada originalmente.
+                |
+                | La cancelación deberá pasar posteriormente por
+                | el flujo postventa correspondiente.
+                |
+                */
+
+                if (
+                    $reservaBloqueada->estado
+                    === EstadoReserva::CONFIRMADA
+                ) {
+
+                    $reprogramacionOrigen =
+                        ReprogramacionReserva::query()
+
+                            ->where(
+                                'reserva_destino_id',
+                                $reservaBloqueada->id
+                            )
+
+                            ->where(
+                                'estado',
+                                EstadoReprogramacion::COMPLETADA->value
+                            )
+
+                            ->lockForUpdate()
+
+                            ->first();
+
+
+                    if (
+                        $reprogramacionOrigen
+                        !== null
+                    ) {
+                        throw new OperacionReservaInvalidaException(
+                            'Una reserva confirmada proveniente de una reprogramación debe gestionarse mediante el flujo de postventa.'
+                        );
+                    }
+                }
+
+
 
 
                 /*

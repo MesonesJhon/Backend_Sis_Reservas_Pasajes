@@ -251,6 +251,23 @@ return Application::configure(
                     $exception->getMessage(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | RF-10.2 - Reprogramaciones
+        |--------------------------------------------------------------------------
+        */
+
+        $exceptions->render(function (
+            OperacionReprogramacionInvalidaException $exception,
+            Request $request
+        ) {
+            return response()->json([
+                'mensaje' =>
+                    $exception->getMessage(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        });
+
     })
 
     ->prefersJsonResponses()

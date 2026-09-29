@@ -154,4 +154,39 @@ class Usuario extends Authenticatable
             'ejecutado_por_usuario_id'
         );
     }
+
+    /**
+     * Reprogramaciones solicitadas por el usuario.
+     */
+    public function reprogramacionesSolicitadas(): HasMany
+    {
+        return $this->hasMany(
+            ReprogramacionReserva::class,
+            'solicitada_por_usuario_id'
+        );
+    }
+
+
+    /**
+     * Reprogramaciones completadas por el usuario.
+     */
+    public function reprogramacionesCompletadas(): HasMany
+    {
+        return $this->hasMany(
+            ReprogramacionReserva::class,
+            'completada_por_usuario_id'
+        );
+    }
+
+
+    /**
+     * Reprogramaciones canceladas por el usuario.
+     */
+    public function reprogramacionesCanceladas(): HasMany
+    {
+        return $this->hasMany(
+            ReprogramacionReserva::class,
+            'cancelada_por_usuario_id'
+        );
+    }
 }

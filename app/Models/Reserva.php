@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\EstadoReserva;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -207,10 +208,35 @@ class Reserva extends Model
      * Historial consolidado de operaciones
      * postventa asociadas a la reserva.
      */
-        public function operacionesPostventa(): HasMany
-        {
-            return $this->hasMany(
-                OperacionPostventa::class
-            );
-        }
+    public function operacionesPostventa(): HasMany
+    {
+        return $this->hasMany(
+            OperacionPostventa::class
+        );
+    }
+
+    /**
+     * Intentos de reprogramación donde esta
+     * reserva funciona como reserva original.
+     */
+    public function reprogramacionesComoOrigen(): HasMany
+    {
+        return $this->hasMany(
+            ReprogramacionReserva::class,
+            'reserva_origen_id'
+        );
+    }
+
+
+    /**
+     * Reprogramación que generó esta reserva
+     * como nueva reserva destino.
+     */
+    public function reprogramacionComoDestino(): HasOne
+    {
+        return $this->hasOne(
+            ReprogramacionReserva::class,
+            'reserva_destino_id'
+        );
+    }
 }

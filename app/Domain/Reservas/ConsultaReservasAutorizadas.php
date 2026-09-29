@@ -221,4 +221,26 @@ class ConsultaReservasAutorizadas
 
         return false;
     }
+
+
+    /**
+     * Determina si un usuario puede solicitar
+     * la reprogramación de una reserva.
+     *
+     * Actualmente:
+     *
+     * - ADMINISTRADOR: cualquier reserva.
+     * - OPERADOR: cualquier reserva operativa.
+     * - CLIENTE: únicamente reservas propias.
+     */
+    public function puedeReprogramar(
+        Usuario $usuario,
+        Reserva $reserva
+    ): bool {
+
+        return $this->puedeVer(
+            $usuario,
+            $reserva
+        );
+    }
 }

@@ -20,7 +20,6 @@ use Tests\Helpers\CrearViajeProgramable;
 
 uses(RefreshDatabase::class);
 
-uses(RefreshDatabase::class);
 
 
 beforeEach(function () {
